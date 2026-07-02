@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>好運搖獎機｜威力彩・大樂透選號</title>
+<style>
+  :root{
+    --red:#C22F2A; --red-deep:#8F1D1D; --red-dark:#5E0F0F;
+    --gold:#E9B44C; --gold-soft:#F3D08A;
+    --ivory:#FFF6E8; --ink:#2B1A12;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    background:var(--red);
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(255,255,255,.06) 0, transparent 40%),
+      radial-gradient(circle at 80% 90%, rgba(0,0,0,.18) 0, transparent 50%);
+    color:var(--ivory);
+    font-family:"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;
+    padding:32px 16px 64px;
+  }
+  header{text-align:center;margin-bottom:22px;}
+  .eyebrow{
+    display:inline-block;border:1px solid var(--gold);color:var(--gold-soft);
+    font-size:12px;letter-spacing:.4em;text-indent:.4em;
+    padding:6px 14px;border-radius:999px;margin-bottom:14px;
+  }
+  h1{font-size:clamp(30px,6vw,46px);letter-spacing:.12em;text-shadow:0 2px 0 var(--red-dark);}
+  h1 span{color:var(--gold);}
+  .sub{margin-top:10px;font-size:14px;color:var(--gold-soft);letter-spacing:.08em;}
+
+  .tabs{display:flex;gap:10px;margin:6px 0 26px;}
+  .tab{
+    font-family:inherit;font-size:15px;font-weight:700;letter-spacing:.2em;text-indent:.2em;
+    padding:10px 26px;border-radius:999px;cursor:pointer;
+    border:2px solid var(--gold);background:transparent;color:var(--gold-soft);
+    transition:background .15s ease,color .15s ease;
+  }
+  .tab.on{background:var(--gold);color:var(--red-dark);}
+  .tab:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+
+  .machine{position:relative;width:min(300px,78vw);aspect-ratio:1;margin:4px auto 18px;}
+  .dome{
+    position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, rgba(255,255,255,.35), rgba(255,255,255,.05) 45%, rgba(0,0,0,.25));
+    border:6px solid var(--gold);
+    box-shadow:0 14px 30px rgba(0,0,0,.35), inset 0 0 40px rgba(0,0,0,.25);
+    overflow:hidden;
+  }
+  .ball{
+    position:absolute;width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:16px;color:var(--ink);
+    background:radial-gradient(circle at 32% 28%, #fff, var(--ivory) 55%, #d9c9a8);
+    box-shadow:inset -4px -6px 8px rgba(0,0,0,.18), 0 3px 5px rgba(0,0,0,.3);
+  }
+  .ball.b2{background:radial-gradient(circle at 32% 28%, #ffe9c0, var(--gold-soft) 55%, #c9973f);}
+  .ball.b3{background:radial-gradient(circle at 32% 28%, #ffd6d0, #f3b3aa 55%, #c67c72);}
+  .machine.shaking .ball{animation:bounce .55s infinite alternate ease-in-out;}
+  .machine.shaking .dome{animation:wobble .35s infinite alternate ease-in-out;}
+  @keyframes bounce{
+    from{transform:translate(0,0) rotate(0);}
+    to{transform:translate(var(--dx,12px),var(--dy,-26px)) rotate(var(--dr,40deg));}
+  }
+  @keyframes wobble{from{transform:rotate(-1.2deg);}to{transform:rotate(1.2deg);}}
+  @media (prefers-reduced-motion: reduce){
+    .machine.shaking .ball,.machine.shaking .dome{animation:none;}
+  }
+  .base{
+    position:absolute;left:50%;bottom:-24px;transform:translateX(-50%);
+    width:70%;height:32px;
+    background:linear-gradient(var(--red-deep),var(--red-dark));
+    border:3px solid var(--gold);border-radius:12px;
+  }
+
+  .controls{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin:32px 0 8px;}
+  button{
+    font-family:inherit;font-size:16px;font-weight:700;
+    letter-spacing:.15em;text-indent:.15em;
+    padding:14px 30px;border-radius:999px;border:2px solid var(--gold);
+    cursor:pointer;transition:transform .12s ease;
+  }
+  button:focus-visible{outline:3px solid #fff;outline-offset:3px;}
+  button:hover{transform:translateY(-2px);}
+  button:active{transform:translateY(1px);}
+  .btn-main{
+    background:linear-gradient(180deg,var(--gold-soft),var(--gold));
+    color:var(--red-dark);
+    box-shadow:0 6px 0 #a5762a, 0 10px 18px rgba(0,0,0,.3);
+  }
+  .btn-ghost{background:transparent;color:var(--gold-soft);}
+  button:disabled{opacity:.5;cursor:wait;transform:none;}
+
+  .ticket{
+    margin-top:24px;width:min(560px,94vw);
+    background:var(--ivory);color:var(--ink);
+    border-radius:14px;padding:22px 22px 18px;
+    box-shadow:0 12px 26px rgba(0,0,0,.35);position:relative;
+  }
+  .ticket::before,.ticket::after{
+    content:"";position:absolute;top:50%;width:26px;height:26px;
+    background:var(--red);border-radius:50%;transform:translateY(-50%);
+  }
+  .ticket::before{left:-13px;}
+  .ticket::after{right:-13px;}
+  .ticket h2{
+    font-size:14px;letter-spacing:.3em;text-indent:.3em;
+    color:var(--red-deep);text-align:center;margin-bottom:16px;
+  }
+  .slots{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .slot{
+    width:52px;height:52px;border-radius:50%;
+    border:2px dashed #c9b08a;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:800;color:var(--red-dark);background:#fff;
+  }
+  .slot.filled{border-style:solid;border-color:var(--red);animation:pop .35s ease;}
+  .slot.special{
+    border-color:var(--gold);
+    background:linear-gradient(180deg,#fff6df,var(--gold-soft));
+    position:relative;
+  }
+  .slot.special::after{
+    content:attr(data-label);
+    position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+    font-size:11px;color:var(--red-deep);letter-spacing:.1em;white-space:nowrap;
+  }
+  @keyframes pop{0%{transform:scale(.3);}70%{transform:scale(1.15);}100%{transform:scale(1);}}
+  .ticket .foot{
+    margin-top:30px;padding-top:12px;border-top:1px dashed #c9b08a;
+    font-size:12px;color:#7a6a55;text-align:center;letter-spacing:.06em;
+  }
+
+  section.block{width:min(560px,94vw);margin-top:38px;}
+  section.block h2{
+    font-size:16px;letter-spacing:.25em;text-indent:.25em;
+    color:var(--gold-soft);text-align:center;margin-bottom:14px;
+  }
+  .grid{
+    display:grid;grid-template-columns:repeat(7,1fr);gap:8px;
+    background:rgba(0,0,0,.15);
+    border:1px solid rgba(233,180,76,.4);
+    border-radius:14px;padding:14px;
+  }
+  .num{
+    aspect-ratio:1;border-radius:50%;
+    border:1px solid rgba(255,246,232,.35);
+    background:transparent;color:var(--ivory);
+    font-size:15px;font-weight:600;padding:0;letter-spacing:0;text-indent:0;
+    transition:background .15s ease,color .15s ease;
+  }
+  .num.on{background:var(--gold);border-color:var(--gold);color:var(--red-dark);font-weight:800;}
+  .num.hot::after{content:"🔥";font-size:9px;position:relative;top:-8px;}
+  .picked-count{text-align:center;margin-top:12px;font-size:14px;color:var(--gold-soft);letter-spacing:.1em;}
+
+  .hotbox{
+    border:1px solid rgba(233,180,76,.5);border-radius:14px;
+    background:rgba(0,0,0,.15);padding:16px 18px;
+    font-size:14px;line-height:2;
+  }
+  .hotbox b{color:var(--gold-soft);}
+  .hotbox .tagline{font-size:12px;color:rgba(255,246,232,.7);}
+
+  .truth{
+    width:min(560px,94vw);margin-top:38px;
+    border:1px solid var(--gold);border-radius:14px;
+    padding:18px 20px;background:rgba(0,0,0,.18);
+    font-size:14px;line-height:1.9;
+  }
+  .truth strong{color:var(--gold);}
+  .truth .odds{display:block;margin-top:8px;font-size:20px;font-weight:800;color:var(--gold-soft);}
+  footer{margin-top:36px;font-size:12px;color:rgba(255,246,232,.65);letter-spacing:.1em;text-align:center;line-height:1.8;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">純屬娛樂・理性投注</div>
+  <h1>好運<span>搖獎機</span></h1>
+  <p class="sub">威力彩・大樂透 選號小工具</p>
+</header>
+
+<div class="tabs" role="tablist">
+  <button class="tab on" id="tabPower" role="tab" aria-selected="true">威力彩</button>
+  <button class="tab" id="tabLotto" role="tab" aria-selected="false">大樂透</button>
+</div>
+
+<div class="machine" id="machine">
+  <div class="dome" id="dome"></div>
+  <div class="base"></div>
+</div>
+
+<div class="controls">
+  <button class="btn-main" id="drawBtn">開始搖獎</button>
+  <button class="btn-ghost" id="resetBtn">清除重來</button>
+</div>
+
+<div class="ticket">
+  <h2 id="ticketTitle">威 力 彩 幸 運 號 碼</h2>
+  <div class="slots" id="slots"></div>
+  <p class="foot">電腦選號僅供參考，開獎以台灣彩券公告為準</p>
+</div>
+
+<section class="block" id="hotSection">
+  <h2>近 期 冷 熱 號</h2>
+  <div class="hotbox" id="hotbox"></div>
+</section>
+
+<section class="block">
+  <h2>自 選 號 碼</h2>
+  <div class="grid" id="grid" role="group" aria-label="選擇第一區號碼"></div>
+  <p class="picked-count" id="pickedInfo"></p>
+</section>
+
+<div class="truth">
+  <strong>老實說：</strong>每一期開獎都是獨立的隨機事件，冷熱號統計沒有任何預測能力，任何號碼組合的中獎機率都完全相同。這個網站是娛樂用的選號小工具，不是預測工具——世界上也不存在真正的預測工具。
+  <span class="odds" id="oddsText">威力彩頭獎機率：約 1 / 22,000,000</span>
+  請把買彩券當作花小錢買個希望，量力而為。
+</div>
+
+<footer>未滿 18 歲不得購買或兌領彩券｜投注請適度，勿沉迷<br>資料統計期間：2026/05/28 – 2026/06/29（威力彩近 10 期）</footer>
+
+<script>
+(function(){
+  const GAMES = {
+    power: {
+      name: '威 力 彩 幸 運 號 碼',
+      total: 38, pick: 6,
+      special: { label: '第二區', pool: 8 },
+      odds: '威力彩頭獎機率：約 1 / 22,000,000',
+      hot: [9, 24, 28, 15, 25],
+      cold: [27, 30, 36, 37],
+      hotHtml: '<b>熱門號</b>：09、24、28（各開出 4 次）、15、25（各 3 次）<br><b>冷門號</b>：27、30、36、37（10 期未開出）<br><b>第二區</b>：04、05 各開出 2 次<br><span class="tagline">※ 統計 2026/05/28–06/29 共 10 期。純屬趣味，對機率零幫助。</span>'
+    },
+    lotto: {
+      name: '大 樂 透 幸 運 號 碼',
+      total: 49, pick: 6,
+      special: { label: '特別號', pool: null },
+      odds: '大樂透頭獎機率：約 1 / 13,980,000',
+      hot: [], cold: [],
+      hotHtml: '<span class="tagline">大樂透模式未內建統計資料。想看冷熱號可到台灣彩券官網查詢歷史開獎——但記得，它們對機率一樣零幫助。</span>'
+    }
+  };
+
+  let game = GAMES.power;
+  const dome = document.getElementById('dome');
+  const machine = document.getElementById('machine');
+  const slotsEl = document.getElementById('slots');
+  const drawBtn = document.getElementById('drawBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const grid = document.getElementById('grid');
+  const pickedInfo = document.getElementById('pickedInfo');
+  const ticketTitle = document.getElementById('ticketTitle');
+  const hotbox = document.getElementById('hotbox');
+  const oddsText = document.getElementById('oddsText');
+  const tabPower = document.getElementById('tabPower');
+  const tabLotto = document.getElementById('tabLotto');
+
+  const skins = ['', 'b2', 'b3'];
+  for (let i = 0; i < 12; i++) {
+    const b = document.createElement('div');
+    b.className = 'ball ' + skins[i % 3];
+    b.textContent = Math.floor(Math.random() * 38) + 1;
+    b.style.left = (12 + Math.random() * 62) + '%';
+    b.style.top = (38 + Math.random() * 42) + '%';
+    b.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+    b.style.setProperty('--dy', (-20 - Math.random() * 70) + 'px');
+    b.style.setProperty('--dr', (Math.random() * 160 - 80) + 'deg');
+    b.style.animationDelay = (Math.random() * .5) + 's';
+    b.style.animationDuration = (.4 + Math.random() * .35) + 's';
+    dome.appendChild(b);
+  }
+
+  let slots = [];
+  let selected = new Set();
+  let running = false;
+
+  function randomInt(max) {
+    if (window.crypto && crypto.getRandomValues) {
+      const buf = new Uint32Array(1);
+      const limit = Math.floor(0xFFFFFFFF / max) * max;
+      let x;
+      do { crypto.getRandomValues(buf); x = buf[0]; } while (x >= limit);
+      return x % max;
+    }
+    return Math.floor(Math.random() * max);
+  }
+
+  function buildSlots() {
+    slotsEl.innerHTML = '';
+    slots = [];
+    for (let i = 0; i < game.pick + 1; i++) {
+      const s = document.createElement('div');
+      s.className = 'slot' + (i === game.pick ? ' special' : '');
+      if (i === game.pick) s.setAttribute('data-label', game.special.label);
+      s.textContent = '—';
+      slotsEl.appendChild(s);
+      slots.push(s);
+    }
+  }
+
+  function buildGrid() {
+    grid.innerHTML = '';
+    selected = new Set();
+    for (let n = 1; n <= game.total; n++) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'num' + (game.hot.includes(n) ? ' hot' : '');
+      b.textContent = n;
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        if (selected.has(n)) {
+          selected.delete(n);
+          b.classList.remove('on');
+          b.setAttribute('aria-pressed', 'false');
+        } else if (selected.size < game.pick) {
+          selected.add(n);
+          b.classList.add('on');
+          b.setAttribute('aria-pressed', 'true');
+        }
+        updatePicked();
+      });
+      grid.appendChild(b);
+    }
+    updatePicked();
+  }
+
+  function drawNumbers() {
+    const pool = Array.from({length: game.total}, (_, i) => i + 1);
+    const picked = [];
+    const drawCount = game.special.pool ? game.pick : game.pick + 1;
+    for (let i = 0; i < drawCount; i++) {
+      picked.push(pool.splice(randomInt(pool.length), 1)[0]);
+    }
+    const main = picked.slice(0, game.pick).sort((a, b) => a - b);
+    const special = game.special.pool
+      ? randomInt(game.special.pool) + 1
+      : picked[game.pick];
+    return { main, special };
+  }
+
+  function clearSlots() {
+    slots.forEach(s => { s.textContent = '—'; s.classList.remove('filled'); });
+  }
+
+  drawBtn.addEventListener('click', () => {
+    if (running) return;
+    running = true;
+    drawBtn.disabled = true;
+    clearSlots();
+    machine.classList.add('shaking');
+    const { main, special } = drawNumbers();
+    const seq = [...main, special];
+    seq.forEach((n, i) => {
+      setTimeout(() => {
+        slots[i].textContent = String(n).padStart(2, '0');
+        slots[i].classList.add('filled');
+        if (i === seq.length - 1) {
+          machine.classList.remove('shaking');
+          drawBtn.disabled = false;
+          running = false;
+        }
+      }, 900 + i * 600);
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    if (running) return;
+    clearSlots();
+    buildGrid();
+  });
+
+  function updatePicked() {
+    if (selected.size === game.pick) {
+      const arr = [...selected].sort((a, b) => a - b)
+        .map(n => String(n).padStart(2, '0'));
+      pickedInfo.textContent = '你的組合：' + arr.join('、') + '（祝好運！）';
+      arr.forEach((n, i) => {
+        slots[i].textContent = n;
+        slots[i].classList.add('filled');
+      });
+      slots[game.pick].textContent = '—';
+      slots[game.pick].classList.remove('filled');
+    } else {
+      pickedInfo.textContent = '已選 ' + selected.size + ' / ' + game.pick + ' 個號碼';
+    }
+  }
+
+  function switchGame(key) {
+    if (running) return;
+    game = GAMES[key];
+    tabPower.classList.toggle('on', key === 'power');
+    tabPower.setAttribute('aria-selected', key === 'power');
+    tabLotto.classList.toggle('on', key === 'lotto');
+    tabLotto.setAttribute('aria-selected', key === 'lotto');
+    ticketTitle.textContent = game.name;
+    oddsText.textContent = game.odds;
+    hotbox.innerHTML = game.hotHtml;
+    buildSlots();
+    buildGrid();
+  }
+
+  tabPower.addEventListener('click', () => switchGame('power'));
+  tabLotto.addEventListener('click', () => switchGame('lotto'));
+  switchGame('power');
+})();
+</script>
+</body>
+</html>
